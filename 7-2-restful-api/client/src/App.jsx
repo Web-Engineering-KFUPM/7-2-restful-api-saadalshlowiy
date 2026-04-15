@@ -179,138 +179,20 @@ LAB SETUP INSTRUCTIONS
         res.status(___).end();
       });
  */
+// Example of the POST (Create) function
+const addItem = async (name) => {
+  const response = await fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name }) // This becomes req.body on the server
+  });
+  const data = await response.json();
+  console.log("Added:", data);
+};
 
-import { useEffect, useMemo, useState } from "react";
-import SongForm from "./components/SongForm.jsx";
-import SongTable from "./components/SongTable.jsx";
-import EditDialog from "./components/EditDialog.jsx";
-import {
-  apiGetSongs, apiGetSong,
-  apiCreateSong, apiUpdateSong, apiDeleteSong
-} from "./lib/api.js";
-import React from "react";
-
-export default function App() {
-  const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [editingSong, setEditingSong] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState({ msg: "", type: "" });
-
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "" }), 2600);
-  };
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await apiGetSongs();
-      setSongs(data);
-    } catch (e) {
-      showToast(`Load error: ${e.message}`, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const onCreate = async (payload) => {
-    setCreating(true);
-    try {
-      const created = await apiCreateSong(payload);
-      setSongs((s) => [created, ...s]);
-      showToast("Song added.");
-    } catch (e) {
-      showToast(e.message, "error");
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const onEdit = async (id) => {
-    setEditingId(id);
-    try {
-      const s = await apiGetSong(id);
-      setEditingSong(s);
-    } catch (e) {
-      showToast(e.message, "error");
-    }
-  };
-
-  const onSave = async (id, payload) => {
-    setSaving(true);
-    try {
-      const upd = await apiUpdateSong(id, payload);
-      setSongs((arr) => arr.map((s) => (s._id === id ? upd : s)));
-      setEditingId(null);
-      setEditingSong(null);
-      showToast("Saved.");
-    } catch (e) {
-      showToast(e.message, "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const onDelete = async (id) => {
-    if (!confirm("Delete this song?")) return;
-    try {
-      await apiDeleteSong(id);
-      setSongs((arr) => arr.filter((s) => s._id !== id));
-      showToast("Deleted.");
-    } catch (e) {
-      showToast(e.message, "error");
-    }
-  };
-
-  const editingOpen = useMemo(() => Boolean(editingId && editingSong), [editingId, editingSong]);
-
-  return (
-    <div className="container">
-      <div className="header">
-        <div className="brand">
-          <div className="logo" />
-          <div>
-            <div className="title">Songs Admin</div>
-            <div style={{ color: "var(--muted)", fontSize: 13 }}>
-              RESTful Web APIs with Fetch — React + Vite
-            </div>
-          </div>
-        </div>
-        <div className="badge">API: {import.meta.env.VITE_API_URL || "http://localhost:5174"}</div>
-      </div>
-
-      <div className="grid">
-        <div className="card">
-          <SongForm onCreate={onCreate} loading={creating} />
-        </div>
-
-        <div className="card">
-          {loading ? (
-            <div className="table-wrap" style={{ padding: 24, color: "#9fb1e8" }}>
-              Loading songs…
-            </div>
-          ) : (
-            <SongTable songs={songs} onEdit={onEdit} onDelete={onDelete} />
-          )}
-        </div>
-      </div>
-
-      <EditDialog
-        open={editingOpen}
-        song={editingSong}
-        onClose={() => { setEditingId(null); setEditingSong(null); }}
-        onSave={onSave}
-        saving={saving}
-      />
-
-      <div className={`toast ${toast.msg ? "show" : ""} ${toast.type}`}>
-        {toast.msg}
-      </div>
-    </div>
-  );
-}
+// Example of the GET (Read) function
+const getItems = async () => {
+  const response = await fetch('/api/items');
+  const data = await response.json();
+  setItems(data); // Assuming you have a state variable
+};
